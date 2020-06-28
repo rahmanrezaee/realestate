@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "110243481386",
+    "firebase_url": "https://taxt-app.firebaseio.com",
+    "project_id": "taxt-app",
+    "storage_bucket": "taxt-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:110243481386:android:42a9494cf420a2000a8053",
+        "android_client_info": {
+          "package_name": "com.example.badam"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "110243481386-m2rsj9ogios0oirko7sng9nc22d2ku9t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.badam",
+            "certificate_hash": "24153b4791b3ea484ad5da886318e18baa7326e0"
+          }
+        },
+        {
+          "client_id": "110243481386-hqjjgo7rj76fafg36fn55obn8duahnho.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAucdcw48wvjFyTVzM__0hSnBu2AEYN68A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "110243481386-hqjjgo7rj76fafg36fn55obn8duahnho.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
