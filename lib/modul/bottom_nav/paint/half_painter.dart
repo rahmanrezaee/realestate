@@ -6,7 +6,7 @@ class HalfPainter extends CustomPainter {
     this.arcPaint = Paint()..color = paintColor;
   }
 
-  Paint arcPaint;
+  Paint? arcPaint;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -24,7 +24,7 @@ class HalfPainter extends CustomPainter {
     path.arcTo(afterRect, radians(180), radians(-90), false);
     path.close();
 
-    canvas.drawPath(path, arcPaint);
+    canvas.drawPath(path, arcPaint!);
   }
 
   @override

@@ -1,9 +1,9 @@
 
 class PhoneNumber {
-  String countryCode;
-  String ddd;
-  String number;
-  bool verified;
+  String? countryCode;
+  String? ddd;
+  String ?number;
+  bool? verified;
 
   PhoneNumber();
 
@@ -25,7 +25,7 @@ class PhoneNumber {
 
   @override
   String toString() {
-    return countryCode+" ("+ddd+") "+number;
+    return countryCode!+" ("+ddd!+") "+number!;
   }
 
 }

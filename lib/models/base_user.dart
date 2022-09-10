@@ -6,17 +6,17 @@ import 'phone_number.dart';
 class BaseUser implements BaseModel<BaseUser> {
   static getCollection() => "users";
 
-  String _uId;
-  String notificationToken;
-  String avatarURL;
-  Status status;
-  String name;
-  String email;
-  bool emailVerified;
-  String password;
-  DateTime createAt;
-  DateTime updateAt;
-  PhoneNumber phoneNumber;
+  String? _uId;
+  String ?notificationToken;
+  String ?avatarURL;
+  Status ?status;
+  String ?name;
+  String ?email;
+  bool ?emailVerified;
+  String ?password;
+  DateTime? createAt;
+  DateTime? updateAt;
+  PhoneNumber ?phoneNumber;
 
   BaseUser();
 
@@ -60,13 +60,13 @@ class BaseUser implements BaseModel<BaseUser> {
     map["password"] = password;
     map["createAt"] = createAt;
     map["updateAt"] = updateAt;
-    map["phoneNumber"] = phoneNumber == null ? null : phoneNumber.toMap();
+    map["phoneNumber"] = phoneNumber == null ? null : phoneNumber!.toMap();
     return map;
   }
 
   @override
   String getUid() {
-    return _uId;
+    return _uId!;
   }
 
   @override

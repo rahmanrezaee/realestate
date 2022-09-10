@@ -14,8 +14,8 @@ const double BAR_HEIGHT = 55;
 
 class FancyBottomNavigation extends StatefulWidget {
   FancyBottomNavigation(
-      {@required this.tabs,
-      @required this.onTabChangedListener,
+      {required this.tabs,
+      required this.onTabChangedListener,
       this.key,
       this.initialSelection = 3,
       this.circleColor,
@@ -28,15 +28,15 @@ class FancyBottomNavigation extends StatefulWidget {
         assert(tabs.length > 1 && tabs.length < 5);
 
   final Function(int position) onTabChangedListener;
-  final Color circleColor;
-  final Color activeIconColor;
-  final Color inactiveIconColor;
-  final Color textColor;
-  final Color barBackgroundColor;
+  final Color? circleColor;
+  final Color? activeIconColor;
+  final Color? inactiveIconColor;
+  final Color? textColor;
+  final Color? barBackgroundColor;
   final List<TabData> tabs;
   final int initialSelection;
 
-  final Key key;
+  final Key? key;
 
   @override
   FancyBottomNavigationState createState() => FancyBottomNavigationState();
@@ -51,11 +51,11 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
   double _circleAlignX = 0;
   double _circleIconAlpha = 1;
 
-  Color circleColor;
-  Color activeIconColor;
-  Color inactiveIconColor;
-  Color barBackgroundColor;
-  Color textColor;
+  Color? circleColor;
+  Color? activeIconColor;
+  Color? inactiveIconColor;
+  Color? barBackgroundColor;
+  Color? textColor;
 
   @override
   void didChangeDependencies() {
@@ -113,12 +113,10 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
   @override
   Widget build(BuildContext context) {
     return Stack(
-      
-      overflow: Overflow.visible,
+      clipBehavior: Clip.none,
       alignment: Alignment.bottomCenter,
       children: <Widget>[
         Container(
-          
           height: BAR_HEIGHT,
           decoration: BoxDecoration(color: barBackgroundColor, boxShadow: [
             BoxShadow(
@@ -134,8 +132,8 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
                     selected: t.key == widget.tabs[currentSelected].key,
                     iconData: t.iconData,
                     title: t.title,
-                    iconColor: inactiveIconColor,
-                    textColor: textColor,
+                    iconColor: inactiveIconColor!,
+                    textColor: textColor!,
                     callbackFunction: (uniqueKey) {
                       int selected = widget.tabs
                           .indexWhere((tabData) => tabData.key == uniqueKey);
@@ -189,15 +187,14 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
                             height: ARC_HEIGHT,
                             width: ARC_WIDTH,
                             child: CustomPaint(
-                              painter: HalfPainter(barBackgroundColor),
+                              painter: HalfPainter(barBackgroundColor!),
                             )),
                         SizedBox(
                           height: CIRCLE_SIZE,
                           width: CIRCLE_SIZE,
                           child: Container(
                             decoration: BoxDecoration(
-                                shape: BoxShape.circle, color: circleColor
-                                ),
+                                shape: BoxShape.circle, color: circleColor),
                             child: Padding(
                               padding: const EdgeInsets.all(0.0),
                               child: AnimatedOpacity(
@@ -252,10 +249,10 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
 }
 
 class TabData {
-  TabData({@required this.iconData, @required this.title, this.onclick});
+  TabData({required this.iconData, required this.title, this.onclick});
 
   IconData iconData;
   String title;
-  Function onclick;
+  Function()? onclick;
   final UniqueKey key = UniqueKey();
 }

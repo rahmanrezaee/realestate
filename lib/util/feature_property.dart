@@ -1,3 +1,4 @@
+import 'package:badam/apiReqeust/constants.dart';
 import 'package:badam/strings.dart';
 import 'package:badam/style/style.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class FeatureProperty extends StatelessWidget {
               child: FlatButton(
                 padding: EdgeInsets.all(0),
                 onPressed: () {
-                Navigator.of(context).pop("خرید");
+                Navigator.of(context).pop(StatusProperty.forsale);
               },
                 child: Container(
                   alignment: Alignment.center,
@@ -47,7 +48,7 @@ class FeatureProperty extends StatelessWidget {
               child: FlatButton(
                 padding: EdgeInsets.all(0),
                 onPressed: () {
-                Navigator.of(context).pop("کرایه");
+                Navigator.of(context).pop(StatusProperty.forrent);
               },
                 child: Container(
                   alignment: Alignment.center,
@@ -57,7 +58,7 @@ class FeatureProperty extends StatelessWidget {
               ),
             ),
          
-             Container(
+          Container(
                margin: EdgeInsets.only(bottom: 10),
                
               decoration: BoxDecoration(
@@ -69,12 +70,33 @@ class FeatureProperty extends StatelessWidget {
               child: FlatButton(
                 padding: EdgeInsets.all(0),
                 onPressed: () {
-                Navigator.of(context).pop("رهن");
+                Navigator.of(context).pop(StatusProperty.formortage);
               },
                 child: Container(
                   alignment: Alignment.center,
                   width: 200,
-                  child: Text(TEXT_BOND,style: feature_style(context)),
+                  child: Text("رهن",style: feature_style(context)),
+                ),
+              ),
+            ),
+          Container(
+               margin: EdgeInsets.only(bottom: 10),
+               
+              decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).primaryColor, width: 3.0),
+                    // color: Colors.indigo[900],
+                    borderRadius: BorderRadius.all(Radius.circular(15))
+
+                  ),
+              child: FlatButton(
+                padding: EdgeInsets.all(0),
+                onPressed: () {
+                Navigator.of(context).pop(StatusProperty.forexchange);
+              },
+                child: Container(
+                  alignment: Alignment.center,
+                  width: 200,
+                  child: Text("معاوضه",style: feature_style(context)),
                 ),
               ),
             ),

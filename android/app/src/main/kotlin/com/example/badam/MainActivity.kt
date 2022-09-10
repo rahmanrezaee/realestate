@@ -1,4 +1,4 @@
-package com.example.badam
+package com.badam.af
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

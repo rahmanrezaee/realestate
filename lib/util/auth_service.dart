@@ -11,6 +11,7 @@ abstract class AuthService{
 class UserAuthData{
   final String uid;
   final String phoneNr;
+  
 
   UserAuthData({this.uid, this.phoneNr});
 }

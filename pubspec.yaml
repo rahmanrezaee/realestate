@@ -13,61 +13,86 @@ description: A new Flutter project.
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+1
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
 dependencies:
   flutter:
     sdk: flutter
-  firebase_auth:
+  # firebase_core: ^0.4.0+9
+  firebase_auth: ^0.15.3
+  json_annotation: ^3.0.0
+  dio_http_cache: ^0.2.9
+  carousel_pro: ^1.0.0
   # flutter_xlider: ^3.2.0
   carousel_slider: ^1.4.1
   # cloud_firestore:
   shimmer: ^1.1.0
+  persian_number_utility: ^0.1.2
   # flutter_cache_manager: ^1.1.3
   url_launcher: ^5.4.2
+  # loadany: ^0.1.4
+  incrementally_loading_listview: ^0.3.0
   
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   share: ^0.6.3+6
   cupertino_icons: ^0.1.2
-  firebase_core:
+  
   http:
-  # flutter_wordpress: ^0.1.4
-  # dio: ^3.0.9
-  shared_preferences: ^0.4.3
+  dio: ^3.0.9
+  shared_preferences: ^0.5.6+1
   # sqflite: 
+  dotted_border: ^1.0.6
   path_provider: 
   flutter_masked_text: ^0.8.0
   # cloud_firestore: ^0.12.3
   page_transition: ^1.1.5
   flutter_html: ^0.11.1
+  provider: 
+  jiffy: ^3.0.1
   font_awesome_flutter: ^8.8.1
   # custom_radio_button: ^0.0.3
   searchable_dropdown: ^1.1.3
   image_picker: ^0.6.4
-  json_annotation: ^2.0.0
+  # json_annotation: ^2.0.0
 
-  # foveraite package
-  hive: ^1.4.1+1
-  hive_flutter: ^0.3.0+2
+  # # foveraite package
+  # hive: ^1.4.1+1
+  # hive_flutter: ^0.3.0+2
  
-  flutter_paginator: ^0.0.6
-  mime: ^0.9.6+3
-  flutter_spinkit: ^4.1.2+1
+  # flutter_paginator: ^0.0.6
+  # mime: ^0.9.6+3
+  # flutter_spinkit: ^4.1.2+1
   validators: ^2.0.0+1
   image_cropper: ^1.2.1
   rflutter_alert: ^1.0.3
   location: ^3.0.0
   # flutter_pagination_helper: ^1.0.1+2
-  loadmore: ^1.0.4
+  # loadmore: ^1.0.4
   # flutter_map: ^0.9.0
   # geolocator: 
   # extended_text_field: ^0.5.0
   progress_dialog: ^1.2.0
-  google_sign_in: ^4.0.4
+  # google_sign_in: ^4.0.4
   # firebase_storage: ^3.0.3
   google_maps_flutter: ^0.5.25+3
+  flutter_reorderable_list: ^0.1.4
   photo_view: ^0.9.2
-
+  # bloc: ^3.0.0
+  # paginate_firestore: ^0.1.3
+  loading: ^1.0.2
+  # flutter_bloc: ^3.1.0
+  # equatable: ^1.0.2
+  rxdart:
+  # dropdown_search: ^0.4.4
+  flutter_typeahead: ^1.2.8
+  flutter_keyboard_visibility: 
+  async: 
+  # flutter_tags: "^0.4.8+2"
+  # custom_radio_grouped_button:
+  flutter_tagging: ^2.2.0+3
+  flutter_tags: "^0.4.9"
+  flutter_svg: 
+  flutter_range_slider: "^1.4.0"
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -94,6 +119,10 @@ flutter:
    - assets/user_default_img_white.png
     # - assets/images/credit_cards.png
    - assets/logo_app.png
+   - assets/img/svg/wc.svg
+
+
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

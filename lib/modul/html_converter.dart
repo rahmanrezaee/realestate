@@ -32,6 +32,10 @@ Widget getHtmlFile(dataIn) {
         switch (node.localName) {
           case "p":
             return TextAlign.right;
+          case "h3":
+            return TextAlign.right;
+          case "h5":
+            return TextAlign.right;
         }
       }
       return null;
@@ -41,6 +45,7 @@ Widget getHtmlFile(dataIn) {
         switch (node.localName) {
           case "p":
             return baseStyle.merge(TextStyle(height: 1.2, fontSize: 15));
+
         }
       }
       return baseStyle;

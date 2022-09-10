@@ -1,19 +1,21 @@
+
+
+import 'package:badam/apiReqeust/constants.dart';
+import 'package:badam/model/Image.dart';
+import 'package:badam/model/property.dart';
 import 'package:badam/modul/SearchDialog.dart';
-import 'package:badam/modul/properties.dart';
-import 'package:badam/page/Maps/MapLocation.dart';
-import 'package:badam/page/Maps/Maps.dart';
-import 'package:badam/page/propeties/search.dart';
-import 'package:badam/strings.dart';
-import 'package:badam/style/style.dart';
+
+import 'package:badam/page/myProperties/myListProperties.dart';
+import 'package:badam/provider/auth_provider.dart';
+import 'package:badam/provider/property_provider.dart';
 import 'package:badam/util/feature_property.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:badam/util/utiles_functions.dart';
+import 'package:carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
-import 'package:page_transition/page_transition.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:incrementally_loading_listview/incrementally_loading_listview.dart';
+import 'package:jiffy/jiffy.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -21,175 +23,570 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
-  Location location;
-  LocationData currentLocation;
-  PermissionStatus _permissionGranted;
-  bool _is_Maps = false;
+    with AutomaticKeepAliveClientMixin<HomePage> {
+  int page = 1;
+  int totalProperties = 1;
+  String taxt_label = "برای خرید";
 
-  bool _serviceEnabled;
-  String _TEXT_FEATURE_PROPERTY = 'خرید';
+  // ScrollController _sc = new ScrollController();
+  // bool isLoading = false;
 
-  Future<void> _checkService() async {
-    final bool serviceEnabledResult = await location.serviceEnabled();
-    setState(() {
-      _serviceEnabled = serviceEnabledResult;
-    });
-  }
+  static PostSortMetaBy meta = PostSortMetaBy.real_estate_property_price;
+  StatusProperty status = StatusProperty.forsale;
+  Map filterdSearch;
 
-  Future<void> _requestService() async {
-    if (_serviceEnabled == null || !_serviceEnabled) {
-      final bool serviceRequestedResult = await location.requestService();
-      setState(() {
-        _serviceEnabled = serviceRequestedResult;
-      });
-      if (!serviceRequestedResult) {
-        return;
-      }
-    }
-  }
+  String _selectedView = enumStringToName(meta.toString());
 
-  Future<void> _requestPermission() async {
-    if (_permissionGranted != PermissionStatus.granted) {
-      final PermissionStatus permissionRequestedResult =
-          await location.requestPermission();
-      setState(() {
-        _permissionGranted = permissionRequestedResult;
-      });
-      if (permissionRequestedResult != PermissionStatus.granted) {
-        return;
-      }
-    }
-  }
+  List<Property> items;
+
+  bool _loadingMore;
+  bool _hasMoreItems;
+  int _maxItems;
+  Future _initialLoad;
 
   @override
+  bool get wantKeepAlive => true;
+  @override
   void initState() {
-    _permissionGranted == PermissionStatus.granted ? null : _requestPermission;
-  
-    _serviceEnabled == true ? null : _requestService;
-   
     super.initState();
 
-    location = new Location();
-    location.getLocation().then((data) {
-      currentLocation = data;
+    initLoad();
+  }
+
+  Future<void> initLoad() async {
+    await Jiffy.locale("ar");
+    _initialLoad = PropertyProvider()
+        .fetchPosts(
+            postParams: PropertyProvider().getParms(
+      index: page,
+      meta: meta,
+      status: status,
+      stateProperty:
+          filterdSearch != null ? filterdSearch["place"]['term_slug'] : null,
+      cityProperty: filterdSearch != null ? filterdSearch["city"] : null,
+      lowerPrice:
+          filterdSearch != null ? filterdSearch["price"]['lower'] : null,
+      lowerSize: filterdSearch != null ? filterdSearch["size"]['upper'] : null,
+      typesProperty: filterdSearch != null
+          ? filterdSearch["type"] == null
+              ? null
+              : filterdSearch["type"]['slug']
+          : null,
+      upperPrice:
+          filterdSearch != null ? filterdSearch["price"]['upper'] : null,
+      upperSize: filterdSearch != null ? filterdSearch["size"]['lower'] : null,
+    ))
+        .then((data) {
+      items = data[0];
+
+      _maxItems = int.parse(data[1][0]);
+      _hasMoreItems = true;
     });
   }
-
-  Future goToFeatureProperty(context) async {
-    return await Navigator.push(
-      context,
-      PageTransition(
-        type: PageTransitionType.upToDown,
-        child: new FeatureProperty(),
-      ),
-    );
-  }
-
-  Future goToSecondScreen(context) async {
-    return await Navigator.push(
-        context,
-        new MaterialPageRoute(
-          builder: (BuildContext context) => new SearchDialog(),
-          fullscreenDialog: true,
-        ));
-  }
-
-  String searchQuerySecond, searchQuery;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Scaffold(
-          // appBar: AppBar(
-          //   elevation: 0,
-          //   centerTitle: true,
-          //   backgroundColor: Colors.white,
-          //   title: ),
-          body: Column(
-            children: <Widget>[
-              Container(
-                color: Theme.of(context).primaryColorDark,
-                height: MediaQuery.of(context).padding.top,
-              ),
-              FlatButton(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Icon(Icons.arrow_drop_down),
-                    Text(
-                      _TEXT_FEATURE_PROPERTY,
-                      style: style_title_appbar(context),
-                    ),
-                  ],
+    super.build(context);
+    return Scaffold(
+        appBar: new AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: FlatButton(
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(Icons.arrow_drop_down),
+                Text(
+                  taxt_label,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
-                onPressed: () {
-                  goToFeatureProperty(context).then((value) {
-                    setState(() {
-                      print(value);
-                      if (value != null && value != "close") {
-                        _TEXT_FEATURE_PROPERTY = value;
-                      }
-                    });
-                  });
-                },
-              ),
-              new Card(
-                elevation: 5,
-                child: new ListTile(
-                    onTap: () {
+              ],
+            ),
+            onPressed: () async {
+              var statusResponse = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FeatureProperty()),
+              );
+              if (statusResponse != "close") {
+                setState(() {
+                  status = statusResponse;
+                  if (status == StatusProperty.forrent) {
+                    taxt_label = "برای کرایه";
+                  } else if (status == StatusProperty.forsale) {
+                    taxt_label = "برای خرید";
+                  } else if (status == StatusProperty.forexchange) {
+                    taxt_label = "برای معاوضه";
+                  } else if (status == StatusProperty.formortage) {
+                    taxt_label = "برای رهن";
+                  }
+
+                  items.clear();
+                  page = 1;
+                  initLoad();
+                });
+              }
+            },
+          ),
+          //  Navigator.pushNamed(widget.ctx, "/")),
+        ),
+        body: _buildList());
+  }
+
+  Future _loadMoreItems() async {
+    ++page;
+    await PropertyProvider()
+        .fetchPosts(
+            postParams: PropertyProvider().getParms(
+      index: page,
+      meta: meta,
+      status: status,
+      stateProperty:
+          filterdSearch != null ? filterdSearch["place"]['term_slug'] : null,
+      cityProperty: filterdSearch != null ? filterdSearch["city"] : null,
+      lowerPrice:
+          filterdSearch != null ? filterdSearch["price"]['lower'] : null,
+      lowerSize: filterdSearch != null ? filterdSearch["size"]['upper'] : null,
+      typesProperty: filterdSearch != null
+          ? filterdSearch["type"] == null
+              ? null
+              : filterdSearch["type"]['slug']
+          : null,
+      upperPrice:
+          filterdSearch != null ? filterdSearch["price"]['upper'] : null,
+      upperSize: filterdSearch != null ? filterdSearch["size"]['lower'] : null,
+    ))
+        .then((data) {
+      List<Property> temp = data[0];
+      items.addAll(temp);
+    });
+    _hasMoreItems = items.length < _maxItems;
+  }
+
+  Widget _buildList() {
+    return FutureBuilder(
+      future: _initialLoad,
+      builder: (context, snapshot) {
+        return Column(
+          children: <Widget>[
+            new Card(
+              elevation: 5,
+              child: new ListTile(
+                  contentPadding:
+                      EdgeInsets.only(top: 0, left: 0, right: 10, bottom: 0),
+                  onTap: () async {
+                    var result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (ctx) => FiltersScreen(this.filterdSearch)),
+                    );
+                    print(result);
+                    if (result != null) {
                       setState(() {
-                        searchQuerySecond = searchQuery;
-                        searchQuery = null;
+                        filterdSearch = result;
+                        items.clear();
+                        page = 1;
+                        initLoad();
                       });
-                      goToSecondScreen(context).then((data) {
-                        if (data != null) {
-                          setState(() {
-                            searchQuery = data;
-                          });
-                        } else {
-                          setState(() {
-                            searchQuery = searchQuerySecond;
-                          });
+                    }
+                  },
+                  leading: const Icon(Icons.search),
+                  title: Row(
+                    children: <Widget>[
+                      Expanded(
+                          child: Text(
+                        'جستجو ولایت ، شهر ، محل ...',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w500),
+                      )),
+                    ],
+                  ),
+                  trailing: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(Icons.filter_list),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          "فلتر",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  )),
+            ),
+            Container(
+              height: 50,
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  (snapshot.connectionState) == ConnectionState.done
+                      ? Text("${_maxItems}  ملک",
+                          style: TextStyle(fontSize: 20))
+                      : Text("صبر کنید", style: TextStyle(fontSize: 20)),
+                  new PopupMenuButton(
+                    child: Row(
+                      children: <Widget>[
+                        Icon(Icons.filter_list),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          "دسته بندی",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w400),
+                        ),
+                      ],
+                    ),
+                    onSelected: (value) {
+                      setState(() {
+                        if (value ==
+                            enumStringToName(PostSortMetaBy
+                                .real_estate_property_price
+                                .toString())) {
+                          meta = PostSortMetaBy.real_estate_property_price;
+                        } else if (value ==
+                            enumStringToName(PostSortMetaBy
+                                .real_estate_property_land
+                                .toString())) {
+                          meta = PostSortMetaBy.real_estate_property_land;
                         }
+
+                        setState(() {
+                          items.clear();
+                          page = 1;
+                          initLoad();
+                          
+                        _selectedView = value;
+                        });
                       });
                     },
-                    leading: const Icon(Icons.search),
-                    title: Row(
-                      children: <Widget>[
-                        Expanded(
-                            child: Text(
-                          SEARCH_LABEL_MAIN,
-                          style: feature_style(context),
-                        )),
-                        FaIcon(Icons.filter_list, color: Colors.grey, size: 24),
-                      ],
-                    )),
+                    itemBuilder: (_) => [
+                      new CheckedPopupMenuItem(
+                        checked: _selectedView ==
+                            enumStringToName(PostSortMetaBy
+                                .real_estate_property_price
+                                .toString()),
+                        value: enumStringToName(PostSortMetaBy
+                            .real_estate_property_price
+                            .toString()),
+                        child: new Text('گران ترین'),
+                      ),
+                      new CheckedPopupMenuItem(
+                        checked: _selectedView ==
+                            enumStringToName(PostSortMetaBy
+                                .real_estate_property_land
+                                .toString()),
+                        value: enumStringToName(PostSortMetaBy
+                            .real_estate_property_land
+                            .toString()),
+                        child: new Text('پیشترین مساحت'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              _is_Maps ? 
-              MapsLocationPage() :
-              PropertiesList(type: searchQuery) ,
-            ],
-            
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-              onPressed: () => setState(() { _is_Maps = true; }),
-              backgroundColor: Theme.of(context).primaryColor,
-              splashColor: Colors.white,
-              icon: Icon(Icons.map,color: Colors.white,),
-              label: Text('نقشه',style: TextStyle(color: Colors.white),))),
+            ),
+            (snapshot.connectionState) == ConnectionState.done
+                ? items != null
+                    ? Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            setState(() {
+                              items.clear();
+                              page = 1;
+                              initLoad();
+                            });
+                          },
+                          child: IncrementallyLoadingListView(
+                            hasMore: () => _hasMoreItems,
+                            itemCount: () => items.length,
+                            loadMore: () async {
+                              await _loadMoreItems();
+                            },
+                            onLoadMore: () {
+                              setState(() {
+                                _loadingMore = true;
+                              });
+                            },
+                            onLoadMoreFinished: () {
+                              setState(() {
+                                _loadingMore = false;
+                              });
+                            },
+                            loadMoreOffsetFromBottom: 2,
+                            itemBuilder: (context, index) {
+                              Property item = items[index];
+                              if ((_loadingMore ?? false) &&
+                                  index == items.length - 1) {
+                                return Column(
+                                  children: <Widget>[
+                                    ItemProperty(
+                                        property: item,
+                                        favoriteFunction: () {
+                                          setState(() =>
+                                              items[index].isFavorite =
+                                                  !items[index].isFavorite);
+                                          Auth()
+                                              .addToFavorite(item.id)
+                                              .then((data) {
+                                            print(data);
+                                            if (!data) {
+                                              setState(() =>
+                                                  items[index].isFavorite =
+                                                      !items[index].isFavorite);
+                                            }
+                                          });
+                                        }),
+                                    PlaceholderItemCard(),
+                                  ],
+                                );
+                              }
+                              return ItemProperty(
+                                  property: item,
+                                  favoriteFunction: () {
+                                    setState(() => items[index].isFavorite =
+                                        !items[index].isFavorite);
+                                    Auth().addToFavorite(item.id).then((data) {
+                                      print(data);
+                                      if (!data) {
+                                        setState(() => items[index].isFavorite =
+                                            !items[index].isFavorite);
+                                      }
+                                    });
+                                  });
+                            },
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Column(
+                        children: <Widget>[
+                          Text("مشکل پیش امده "),
+                          FlatButton(
+                            onPressed: initLoad,
+                            child: Icon(Icons.replay),
+                          ),
+                        ],
+                      ))
+                : Center(child: CircularProgressIndicator())
+          ],
+        );
+      },
     );
   }
 
-  Widget googleMapWidget() {
-    // print(currentLocation.latitude.toString()+" , "+currentLocation.longitude.toString());
-    return GoogleMap(
-      myLocationButtonEnabled: true,
-      buildingsEnabled: true,
-      myLocationEnabled: true,
-      initialCameraPosition: CameraPosition(
-        target: currentLocation != null ? currentLocation : LatLng(34.0, 62.0),
-        zoom: 10.0,
+  Widget _buildProgressIndicator() {
+    return Center(
+      child: new CircularProgressIndicator(),
+    );
+  }
+}
+
+class ItemProperty extends StatelessWidget {
+  Property property;
+  VoidCallback favoriteFunction;
+  ItemProperty({this.property, this.favoriteFunction});
+  @override
+  Widget build(BuildContext context) {
+    List<ImageProperty> image = property.gallary;
+
+    return GestureDetector(
+      onTap: () => Navigator.of(context)
+          .pushNamed("/singleProperty", arguments: property),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          new Container(
+              margin: EdgeInsets.only(top: 10),
+              child: new Center(
+                child: new Row(
+                  children: <Widget>[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Stack(
+                        children: <Widget>[
+                          Container(
+                            width: (MediaQuery.of(context).size.width / 2) - 30,
+                            height: 115,
+                            child: Carousel(
+                              boxFit: BoxFit.cover,
+                              images: property.gallary
+                                  .map((m) => GestureDetector(
+                                        onTap: () {
+                                          int index = 0;
+                                          int selectindex = 0;
+                                          property.gallary.map((f) {
+                                            m.id == f.id
+                                                ? selectindex = index
+                                                : index++;
+                                          }).toList();
+
+                                          Navigator.pushNamed(
+                                              context, "/ImageViewPage",
+                                              arguments: {
+                                                "images": property.gallary,
+                                                "selected": selectindex,
+                                              });
+                                        },
+                                        child: FadeInImage.assetNetwork(
+                                          placeholder:
+                                              "assets/img/placehoder.png",
+                                          image: m.sourceUrl,
+                                          fit: BoxFit.fitHeight,
+                                        ),
+                                      ))
+                                  .toList(),
+                              dotSize: 2.0,
+                              dotSpacing: 5.0,
+                              autoplay: false,
+                              dotColor: Theme.of(context).accentColor,
+                              indicatorBgPadding: 5.0,
+                              dotBgColor: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.4),
+                              borderRadius: true,
+                              moveIndicatorFromBottom: 180.0,
+                              noRadiusForIndicator: true,
+                            ),
+                          ),
+                          // FadeInImage.assetNetwork(
+                          //   placeholder: "assets/img/placehoder.png",
+                          //   image: image.length > 0 ? image[0].sourceUrl : "",
+
+                          //   alignment: Alignment.bottomLeft,
+                          //   fit: BoxFit.fitHeight,
+                          // ),
+                          Positioned(
+                            child: Container(
+                              alignment: Alignment.center,
+                              color: Colors.yellow[700],
+                              width: 40,
+                              height: 20,
+                              child: Text(
+                                UtilClass.getTextLabel(property.propertyLabel),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    new Expanded(
+                      child: new Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: new Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Expanded(
+                                  child: new Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: <Widget>[
+                                                  new Text(
+                                                    property.title,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    // set some style to text
+                                                    style: new TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  new Text(
+                                                    "${property.types != null ? property.types['term_name'] : ""} ",
+                                                    //
+                                                    // set some style to text
+                                                    style: new TextStyle(
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 5,
+                                                  ),
+                                                  new Text(
+                                                    "${property.state != null ? property.state['term_name'] : ""} " +
+                                                        "${property.city['term_name']} ",
+                                                    // set some style to text
+                                                    style: new TextStyle(
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 5,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ]),
+                                ),
+                                IconButton(
+                                  icon: property.isFavorite
+                                      ? FaIcon(FontAwesomeIcons.solidHeart)
+                                      : FaIcon(FontAwesomeIcons.heart),
+                                  onPressed: favoriteFunction,
+                                )
+                              ],
+                            ),
+                            Row(
+                              children: <Widget>[
+                                Text(
+                                  "${property.area + property.areaPrefix} ",
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                property.buildYear != null
+                                    ? Text(
+                                        "ساخت " + property.buildYear.toString())
+                                    : SizedBox(
+                                        width: 10,
+                                      ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              Jiffy(property.date).fromNow(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(0, 0, 10, 0)),
+          Divider(),
+        ],
       ),
     );
   }

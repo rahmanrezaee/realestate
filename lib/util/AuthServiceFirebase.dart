@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'package:badam/util/httpRequest.dart';
-import 'package:badam/util/sharedPreference.dart';
-import 'package:badam/util/utiles_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import './auth_service.dart';
@@ -11,6 +8,8 @@ class AuthServiceFirebase extends AuthService {
   DateTime tokenCreationDate;
   int tokenLifetimeInMinutes = 5;
   BuildContext context;
+  String phoneNumber;
+  String userId;
 
   AuthServiceFirebase({@required this.context});
 
@@ -25,41 +24,29 @@ class AuthServiceFirebase extends AuthService {
 
     PhoneVerificationFailed phoneVerificationFailed = (authException) {
       print('phone verification failed');
+      // authException.code
       print(authException.message);
-      c.completeError(Error());
+      c.completeError(authException);
     };
 
     PhoneVerificationCompleted phoneVerificationCompleted = (firebaseUser) {
+    
       FirebaseAuth.instance
           .signInWithCredential(firebaseUser)
           .catchError((err) {
-
-            return "ERROR_NETWORK_REQUEST_FAILED";
-            c.completeError(err);
-          })
-          .whenComplete(() {
-              readPreferenceString("tempUsername").then((user) {
-                userAlreadyRegisterd(getPhoneforuser(user)).then((isAlreadyReister) {
-                  if (isAlreadyReister.body.toString() == '0') {
-                    Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, "/Dashboard");
-                  } else if (isAlreadyReister.body.toString() == '1') {
-                    Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, "/register");
-                  }
-                }).catchError((error) {
-                  print(error);
-                });
-        }).catchError((onError) {
-          print('onError');
-          print(onError);
-        });
+        c.completeError(err);
       });
-      return c.future;
+
+      c.complete("done");
     };
+
+    String phoneEdit = phoneNumber.contains("+")
+        ? phoneNumber
+        : "+93${phoneNumber.substring(0)}";
+
     await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        timeout: Duration(seconds: 10),
+        phoneNumber: phoneEdit,
+        timeout: Duration(seconds: 100),
         verificationCompleted: phoneVerificationCompleted,
         verificationFailed: phoneVerificationFailed,
         codeSent: codeSent,
@@ -75,6 +62,7 @@ class AuthServiceFirebase extends AuthService {
       verificationId: verificationId,
       smsCode: smsCode,
     );
+
     var firebaseUser =
         await FirebaseAuth.instance.signInWithCredential(credential);
 
@@ -86,9 +74,8 @@ class AuthServiceFirebase extends AuthService {
   @override
   Future<UserAuthData> getCurrentUser() async {
     var firebaseUser = await FirebaseAuth.instance.currentUser();
-    if (firebaseUser == null) return UserAuthData(uid: null, phoneNr: '');
-    return UserAuthData(
-        uid: firebaseUser.uid, phoneNr: firebaseUser.phoneNumber ?? '');
+    if (firebaseUser == null) return null;
+    return UserAuthData(  uid: firebaseUser.uid, phoneNr: firebaseUser.phoneNumber ?? '');
   }
 
   @override

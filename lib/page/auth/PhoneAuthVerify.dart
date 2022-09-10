@@ -1,20 +1,17 @@
 import 'dart:async';
 
 import 'package:badam/util/AuthServiceFirebase.dart';
-import 'package:badam/util/httpRequest.dart';
-import 'package:badam/util/sharedPreference.dart';
-import 'package:badam/util/utiles_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class Countdown extends AnimatedWidget {
-  Countdown({Key key, this.animation}) : super(key: key, listenable: animation);
-  Animation<int> animation;
+  Countdown({Key? key, this.animation}) : super(key: key, listenable: animation!);
+  Animation<int> ?animation;
 
   @override
   build(BuildContext context) {
     return new Text(
-      animation.value.toString(),
+      animation!.value.toString(),
       style: new TextStyle(fontSize: 150.0),
     );
   }
@@ -32,13 +29,13 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify>
     with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   void showInSnackBar(String value) {
-    _scaffoldKey.currentState
+    _scaffoldKey.currentState!
         .showSnackBar(new SnackBar(content: new Text(value)));
   }
 
   var varify_id;
   _PhoneAuthVerifyState(this.varify_id);
-  double _height, _width, _fixedPadding;
+  double? _height, _width, _fixedPadding;
 
   FocusNode focusNode1 = FocusNode();
   FocusNode focusNode2 = FocusNode();
@@ -48,7 +45,7 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify>
   FocusNode focusNode6 = FocusNode();
   String code = "";
 
-  AnimationController _controller;
+  AnimationController? _controller;
 
   static const int kStartValue = 4;
 
@@ -66,7 +63,7 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify>
           );
   }
 
-  AuthServiceFirebase insta;
+  AuthServiceFirebase ?insta;
   bool _resendLoader = false;
   @override
   void initState() {
@@ -86,30 +83,30 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify>
             animation: new StepTween(
               begin: kStartValue,
               end: 0,
-            ).animate(_controller),
+            ).animate(_controller!),
           )
         : FlatButton(
             onPressed: () {
               setState(() {
                 _resendLoader = true;
               });
-              readPreferenceString("tempUsername").then((username) {
-                insta
-                    .submitPhoneNumber(phoneNumber: username)
-                    .then((phoneVarifyId) {
-                  setState(() {
-                    this.varify_id = phoneVarifyId;
-                    _isLoading = false;
-                    _resendLoader = false;
-                  });
-                });
-              }).catchError((error) {
-                print(error.toString());
-                setState(() {
-                  _isLoading = false;
-                  _resendLoader = false;
-                });
-              });
+//              readPreferenceString("tempUsername").then((username) {
+//                insta
+//                    .submitPhoneNumber(phoneNumber: username)
+//                    .then((phoneVarifyId) {
+//                  setState(() {
+//                    this.varify_id = phoneVarifyId;
+//                    _isLoading = false;
+//                    _resendLoader = false;
+//                  });
+//                });
+//              }).catchError((error) {
+//                print(error.toString());
+//                setState(() {
+//                  _isLoading = false;
+//                  _resendLoader = false;
+//                });
+//              });
             },
             child: _resendLoader
                 ? Container(
@@ -128,7 +125,7 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify>
   Widget build(BuildContext context) {
     _height = MediaQuery.of(context).size.height;
     _width = MediaQuery.of(context).size.width;
-    _fixedPadding = _height * 0.025;
+    _fixedPadding = _height !* 0.025;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -218,7 +215,7 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify>
   signIn() {
     if (code.length < 6) {
       print(code.length);
-      _scaffoldKey.currentState.showSnackBar(
+      _scaffoldKey.currentState!.showSnackBar(
         new SnackBar(
           backgroundColor: Colors.redAccent,
           content: Row(
@@ -247,93 +244,92 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify>
 
     print(varify_id.toString());
 
-        Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, "/register");
+    Navigator.pop(context);
+    Navigator.pushReplacementNamed(context, "/register");
     AuthServiceFirebase authSer = new AuthServiceFirebase(context: context);
-
-    readPreferenceString("tempUsername").then((user) {
-      userAlreadyRegisterd(getPhoneforuser(user)).then((isAlreadyReister) {
-        authSer
-            .confirmSMSCode(smsCode: smsCode, verificationId: this.varify_id)
-            .then((data) {
-          if (data != null) {
-            setState(() {
-              _isLoading = false;
-            });
-
-            print(isAlreadyReister.body.toString());
-
-            if (isAlreadyReister.body.toString() == '0') {
-              Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, "/Dashboard");
-            } else if (isAlreadyReister.body.toString() == '1') {
-              
-            } else {
-              _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                backgroundColor: Colors.redAccent,
-                content: new Text(
-                  'اتصال انترنت تان را چک کنید',
-                  style: TextStyle(fontFamily: "Vazir"),
-                ),
-              ));
-              Timer(Duration(seconds: 1), () {
-                Navigator.pop(context);
-              });
-            }
-          }
-        }).catchError((e) {
-          setState(() {
-            _isLoading = false;
-          });
-          print(e);
-          if (e.code == "ERROR_INVALID_VERIFICATION_CODE") {
-            setState(() {
-              _isLoading = false;
-            });
-
-            _scaffoldKey.currentState.showSnackBar(new SnackBar(
-              backgroundColor: Colors.redAccent,
-              content: new Text(
-                'کد نمبر درست نمیباشد.',
-                style: TextStyle(fontFamily: "Vazir"),
-              ),
-            ));
-          } else {
-            setState(() {
-              _isLoading = false;
-            });
-            _scaffoldKey.currentState.showSnackBar(new SnackBar(
-              backgroundColor: Colors.redAccent,
-              content: new Text(
-                'اتصال انترنت تان را چک کنید',
-                style: TextStyle(fontFamily: "Vazir"),
-              ),
-            ));
-          }
-        });
-      }).catchError((error) {
-        setState(() {
-          _isLoading = false;
-        });
-
-        print(error);
-        _scaffoldKey.currentState.showSnackBar(new SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: new Text(
-            'اتصال انترنت تان را چک کنید',
-            style: TextStyle(fontFamily: "Vazir"),
-          ),
-        ));
-      });
-    });
+//
+////    readPreferenceString("tempUsername").then((user) {
+//      Auth().userAlreadyRegisterd(user).then((isAlreadyReister) {
+//        authSer
+//            .confirmSMSCode(smsCode: smsCode, verificationId: this.varify_id)
+//            .then((data) {
+//          if (data != null) {
+//            setState(() {
+//              _isLoading = false;
+//            });
+//
+//            print(isAlreadyReister.body.toString());
+//
+//            if (isAlreadyReister.body.toString() == '0') {
+//              Navigator.pop(context);
+//              Navigator.pushReplacementNamed(context, "/Dashboard");
+//            } else if (isAlreadyReister.body.toString() == '1') {
+//            } else {
+//              _scaffoldKey.currentState.showSnackBar(new SnackBar(
+//                backgroundColor: Colors.redAccent,
+//                content: new Text(
+//                  'اتصال انترنت تان را چک کنید',
+//                  style: TextStyle(fontFamily: "Vazir"),
+//                ),
+//              ));
+//              Timer(Duration(seconds: 1), () {
+//                Navigator.pop(context);
+//              });
+//            }
+//          }
+//        }).catchError((e) {
+//          setState(() {
+//            _isLoading = false;
+//          });
+//          print(e);
+//          if (e.code == "ERROR_INVALID_VERIFICATION_CODE") {
+//            setState(() {
+//              _isLoading = false;
+//            });
+//
+//            _scaffoldKey.currentState.showSnackBar(new SnackBar(
+//              backgroundColor: Colors.redAccent,
+//              content: new Text(
+//                'کد نمبر درست نمیباشد.',
+//                style: TextStyle(fontFamily: "Vazir"),
+//              ),
+//            ));
+//          } else {
+//            setState(() {
+//              _isLoading = false;
+//            });
+//            _scaffoldKey.currentState.showSnackBar(new SnackBar(
+//              backgroundColor: Colors.redAccent,
+//              content: new Text(
+//                'اتصال انترنت تان را چک کنید',
+//                style: TextStyle(fontFamily: "Vazir"),
+//              ),
+//            ));
+//          }
+//        });
+//      }).catchError((error) {
+//        setState(() {
+//          _isLoading = false;
+//        });
+//
+//        print(error);
+//        _scaffoldKey.currentState.showSnackBar(new SnackBar(
+//          backgroundColor: Colors.redAccent,
+//          content: new Text(
+//            'اتصال انترنت تان را چک کنید',
+//            style: TextStyle(fontFamily: "Vazir"),
+//          ),
+//        ));
+//      });
+//    });
   }
 
   // This will return pin field - it accepts only single char
-  Widget getPinField({String key, FocusNode focusNode}) => SizedBox(
+  Widget getPinField({String? key, FocusNode ?focusNode}) => SizedBox(
         height: 40.0,
         width: 35.0,
         child: TextField(
-          key: Key(key),
+          key: Key(key!),
           expands: false,
           autofocus: key.contains("1") ? true : false,
           focusNode: focusNode,
@@ -362,7 +358,6 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify>
               }
             }
           },
-          maxLengthEnforced: false,
           textAlign: TextAlign.center,
           cursorColor: Theme.of(context).primaryColor,
           keyboardType: TextInputType.number,

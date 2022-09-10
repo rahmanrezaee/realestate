@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:badam/model/User.dart';
 import 'package:badam/style/style.dart';
-import 'package:badam/util/sharedPreference.dart';
 import 'package:flutter/material.dart';
-// import 'package:page_transition/page_transition.dart';
 
 class SplashScreen extends StatefulWidget {
   @override

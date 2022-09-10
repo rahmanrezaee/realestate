@@ -11,7 +11,7 @@ class LoginUser extends StatefulWidget {
 class _LoginUserState extends State<LoginUser> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   void showInSnackBar(String value) {
-    _scaffoldKey.currentState
+    _scaffoldKey.currentState!
         .showSnackBar(new SnackBar(content: new Text(value)));
   }
 
@@ -19,7 +19,7 @@ class _LoginUserState extends State<LoginUser> {
 
 
   Future<void> LoginUserDB() async {
-    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+    _scaffoldKey.currentState!.showSnackBar(new SnackBar(
       backgroundColor: Colors.green,
       content: Row(
         mainAxisSize: MainAxisSize.max,
@@ -42,7 +42,7 @@ class _LoginUserState extends State<LoginUser> {
         }).then((data) {
       print(data.body);
       if (data.body == "2") {
-        _scaffoldKey.currentState.showSnackBar(
+        _scaffoldKey.currentState!.showSnackBar(
           new SnackBar(
             backgroundColor: Colors.redAccent,
             content: Row(
@@ -90,7 +90,7 @@ class _LoginUserState extends State<LoginUser> {
                       child: TextFormField(
                           textDirection: TextDirection.rtl,
                           validator: (value) {
-                            if (value.isEmpty) {
+                            if (value!.isEmpty) {
                               return 'Please Enter Password';
                             }
                             return null;
